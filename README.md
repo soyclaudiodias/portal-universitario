@@ -4,7 +4,7 @@ Uma aplicação web moderna para visualização e acompanhamento de disciplinas 
 
 ---
 
-## 👥 Integrantes do Projeto
+## Integrantes do Projeto
 
 - Cláudio Dias - 10403569  
 - Guillermo Kuznietz - 10410134  
@@ -12,7 +12,7 @@ Uma aplicação web moderna para visualização e acompanhamento de disciplinas 
 
 ---
 
-## 💡 Ideação do Projeto
+## Ideação do Projeto
 
 A ideia do **Portal Universitário** surgiu a partir da necessidade de organizar, de forma simples e visual, as principais informações acadêmicas de um aluno.
 
@@ -33,7 +33,7 @@ A escolha foi baseada em:
 
 ---
 
-## 🌍 Caráter Extensionista
+## Caráter Extensionista
 
 O projeto pode ser utilizado como uma ferramenta de apoio ao estudante, facilitando o acesso às informações acadêmicas em um único ambiente.
 
@@ -49,7 +49,7 @@ Além disso, o sistema pode evoluir para:
 
 ---
 
-## 📚 Sobre o Projeto
+## Sobre o Projeto
 
 O **Portal Universitário** permite que o usuário:
 
@@ -64,7 +64,7 @@ O **Portal Universitário** permite que o usuário:
 
 ---
 
-## 🧠 Wireframe
+## Wireframe
 
 ### Protótipo para modelo web
 
@@ -85,7 +85,7 @@ A tela da disciplina apresenta:
 - Indicadores de desempenho (média, faltas e situação)
 - Lista de avaliações organizadas
 
-📌 Futuramente, o sistema contará com integração de chat, possivelmente como:
+Futuramente, o sistema contará com integração de chat, possivelmente como:
 - Botão flutuante
 - Painel lateral
 
@@ -97,7 +97,7 @@ A tela da disciplina apresenta:
 
 ---
 
-## ⚙️ Tecnologias Utilizadas
+## Tecnologias Utilizadas
 
 - **Next.js 16** – Framework React
 - **React 19** – Interface de usuário
