@@ -77,6 +77,16 @@
   color: var(--color-muted);
 }
 
+@media (max-width: 426px) {
+  .left {
+    display: none;
+  }
+
+  .header {
+    justify-content: flex-end;
+  }
+}
+
 @media (max-width: 600px) {
   .header {
     gap: 16px;

@@ -83,6 +83,10 @@
   border-bottom-right-radius: 999px;
 }
 
+.text:hover {
+  background-color: var(--color-primary-dark);
+}
+
 @media (max-width: 600px) {
   .logoImg {
     width: 200px;

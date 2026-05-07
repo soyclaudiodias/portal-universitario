@@ -13,11 +13,11 @@ export default function Home() {
   return (
     <main className={styles.container}>
       <header className={styles.header}>
-        <div className={styles.left}>
-          <span>HIGIENÓPOLIS</span>
-          <span className={styles.separator}>|</span>
-          <span>CURSO</span>
-        </div>
+<div className={styles.left}>
+  <span>HIGIENÓPOLIS</span>
+  <span className={styles.separator}>|</span>
+  <span>CURSO</span>
+</div>
 
         <div className={styles.right}>
           <span className={styles.name}>NOME</span>
