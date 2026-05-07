@@ -89,11 +89,13 @@ Futuramente, o sistema contará com integração de chat, possivelmente como:
 - Botão flutuante
 - Painel lateral
 
-<img width="2880" height="2048" alt="image" src="https://github.com/user-attachments/assets/d51a0caf-3aea-400c-bd91-de1d88c079f7" />
+<img width="1919" height="866" alt="Captura de tela 2026-05-07 092346" src="https://github.com/user-attachments/assets/98135498-68d3-4206-b10d-762ae9701307" />
 <hr>
-<img width="2880" height="2048" alt="image" src="https://github.com/user-attachments/assets/34d45af7-1116-407b-97d4-472409a0b327" />
+<img width="1901" height="865" alt="Captura de tela 2026-05-07 092410" src="https://github.com/user-attachments/assets/593a9aff-8cb3-479a-b4a9-228655ed7892" />
 <hr>
-<img width="2880" height="3666" alt="image" src="https://github.com/user-attachments/assets/1a352439-4414-4a09-a035-346c8ffe6518" />
+<img width="1919" height="851" alt="Captura de tela 2026-05-07 092451" src="https://github.com/user-attachments/assets/97dbd73f-15db-4434-a3b3-25febec49904" />
+<img width="1919" height="868" alt="Captura de tela 2026-05-07 092504" src="https://github.com/user-attachments/assets/b7d0bc78-6b80-4e6c-94b9-28c7e9533af7" />
+
 
 ---
 
@@ -374,6 +376,16 @@ As media queries ajustam o layout para telas menores.
 Na tela de login, a logo diminui e o botão ocupa melhor o espaço disponível.
 
 ```css
+@media (max-width: 426px) {
+  .left {
+    display: none;
+  }
+
+  .header {
+    justify-content: flex-end;
+  }
+}
+
 @media (max-width: 600px) {
   .grid {
     padding: 40px 0;
