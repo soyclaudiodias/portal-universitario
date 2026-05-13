@@ -5,6 +5,8 @@
   --label: #555555;
   --red-primary: #e31026;
   --red-dark: #e4022d;
+  --color-primary: #e31026;
+  --color-primary-dark: #c60f22;
 }
 
 .container {
@@ -47,6 +49,20 @@
   border-radius: 8px;
   border: none;
   background-color: var(--white);
+}
+
+.message {
+  margin-top: 16px;
+  color: var(--red-primary);
+  font-size: 14px;
+  text-align: center;
+}
+
+.successMessage {
+  margin-top: 16px;
+  color: #2d7a2d;
+  font-size: 14px;
+  text-align: center;
 }
 
 .button {
