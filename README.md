@@ -18,7 +18,7 @@ A ideia do **Portal Universitário** surgiu a partir da necessidade de organizar
 
 Durante o processo de ideação, foram consideradas diferentes possibilidades, como:
 - Um sistema focado apenas em notas
-- Um chatbot educacional isolado
+- Um chatbot educacional isolado (implementado no primeiro projeto)
 - Um portal completo com múltiplas funcionalidades
 
 Após discussões em grupo (brainstorming), optou-se por desenvolver um **portal centralizado**, que reúne:
@@ -60,7 +60,7 @@ O **Portal Universitário** permite que o usuário:
   - Média atual
   - Frequência
   - Situação (aprovado/reprovado)
-  - Avaliações (Prova 1 a Prova 4)
+  - Notas (Provas, Projetos, Atividades, etc)
 
 ---
 
@@ -193,14 +193,7 @@ Os campos usam `label` com `htmlFor`, melhorando acessibilidade.
 ```tsx
 import styles from '../styles/Home.module.css'
 import Link from 'next/link'
-
-const disciplinas = [
-  { id: 1, nome: 'Disciplina 1', professor: 'Fulano' },
-  { id: 2, nome: 'Disciplina 2', professor: 'Beltrano' },
-  { id: 3, nome: 'Disciplina 3', professor: 'Ciclano' },
-  { id: 4, nome: 'Disciplina 4', professor: 'Ciclano' },
-  { id: 5, nome: 'Disciplina 5', professor: 'Ciclano' },
-]
+import { disciplinas } from '../data/disciplinas'
 
 export default function Home() {
   return (
@@ -239,7 +232,7 @@ export default function Home() {
 }
 ```
 
-A Home exibe as disciplinas em cards.  
+A Home exibe as disciplinas em cards, que ficam salvas em um arquivo separado.  
 O `map()` percorre a lista de disciplinas e cria um card para cada item.  
 O componente `Link` permite navegar para a página de detalhes da disciplina sem recarregar o site.
 
@@ -300,7 +293,6 @@ export default function Disciplina() {
             <div>
               <strong>SITUAÇÃO</strong>
               <h2 className={styles.aprovado}>Aprovado</h2>
-              <p>Parabéns! 🎉</p>
             </div>
           </article>
         </section>

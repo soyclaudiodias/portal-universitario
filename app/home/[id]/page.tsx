@@ -1,6 +1,21 @@
+import { notFound } from 'next/navigation'
 import styles from '../../styles/Disciplina.module.css'
+import { disciplinas } from '../../data/disciplinas'
 
-export default function Disciplina() {
+interface PageProps {
+  params: {
+    id: string
+  }
+}
+
+export default async function Disciplina({ params }: PageProps) {
+  const {id} = await params
+  const disciplina = disciplinas.find((item) => item.id === id)
+
+  if (!disciplina) {
+    notFound()
+  }
+
   return (
     <main className={styles.container}>
       <header className={styles.header}>
@@ -21,8 +36,8 @@ export default function Disciplina() {
       </section>
 
       <section className={styles.content}>
-        <h1>Disciplina 1</h1>
-        <p className={styles.professor}>Prof.(a) - Fulano</p>
+        <h1>{disciplina.nome}</h1>
+        <p className={styles.professor}>Prof.(a) - {disciplina.professor}</p>
 
         <hr />
 
@@ -32,7 +47,7 @@ export default function Disciplina() {
 
             <div>
               <strong>MÉDIA ATUAL</strong>
-              <h2>7,5</h2>
+              <h2>{disciplina.media}</h2>
               <p>Mínimo para aprovação: 6,0</p>
             </div>
           </article>
@@ -42,7 +57,7 @@ export default function Disciplina() {
 
             <div>
               <strong>FALTAS</strong>
-              <h2>15%</h2>
+              <h2>{disciplina.faltas}</h2>
               <p>Presença mínima: 75%</p>
             </div>
           </article>
@@ -52,7 +67,9 @@ export default function Disciplina() {
 
             <div>
               <strong>SITUAÇÃO</strong>
-              <h2 className={styles.aprovado}>Aprovado</h2>
+              <h2 className={disciplina.situacao === 'Aprovado' ? styles.aprovado : ''}>
+                {disciplina.situacao}
+              </h2>
             </div>
           </article>
         </section>
@@ -69,12 +86,7 @@ export default function Disciplina() {
             <span>NOTA</span>
           </div>
 
-          {[
-            ['Prova 1', 'Prova', '10/03/2024', '2,0', '8,0'],
-            ['Prova 2', 'Prova', '25/03/2024', '2,0', '7,5'],
-            ['Prova 3', 'Prova', '15/04/2024', '2,5', '6,5'],
-            ['Prova 4', 'Prova', '30/04/2024', '1,5', '8,0'],
-          ].map((item, index) => (
+          {disciplina.avaliacoes.map((item, index) => (
             <article className={styles.avaliacaoItem} key={index}>
               <div>
                 <strong>{item[0]}</strong>
