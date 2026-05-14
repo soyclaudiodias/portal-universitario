@@ -150,9 +150,50 @@ O `body` define a fonte padrão, remove a margem automática do navegador e apli
 ### Tela de Login
 
 ```tsx
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import styles from '../styles/Login.module.css'
 
 export default function LoginForm() {
+  const router = useRouter()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [message, setMessage] = useState('')
+  const [success, setSuccess] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  async function handleSubmit(event) {
+    event.preventDefault()
+    setMessage('')
+    setLoading(true)
+
+    const response = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    })
+
+    const data = await response.json()
+    setLoading(false)
+
+    if (!response.ok) {
+      setSuccess(false)
+      setMessage(data.error || 'Falha ao fazer login')
+      return
+    }
+
+    setSuccess(true)
+    setMessage(`Login bem-sucedido: ${data.email}`)
+    setEmail('')
+    setPassword('')
+
+    setTimeout(() => {
+      router.push('/home')
+    }, 600)
+  }
+
   return (
     <main className={styles.container}>
       <img
@@ -162,12 +203,22 @@ export default function LoginForm() {
       />
 
       <section className={styles.loginBox} aria-label="Área de login">
-        <form className={styles.form}>
+        <form className={styles.form} onSubmit={handleSubmit}>
           <label htmlFor="email">E-mail</label>
-          <input id="email" type="email" />
+          <input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+          />
 
           <label htmlFor="senha">Senha</label>
-          <input id="senha" type="password" />
+          <input
+            id="senha"
+            type="password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+          />
 
           <button type="submit" className={styles.button}>
             <span className={styles.iconArea}>
@@ -176,6 +227,12 @@ export default function LoginForm() {
 
             <span className={styles.text}>ENTRAR</span>
           </button>
+
+          {message ? (
+            <p className={success ? styles.successMessage : styles.message}>
+              {message}
+            </p>
+          ) : null}
         </form>
       </section>
     </main>
@@ -185,6 +242,47 @@ export default function LoginForm() {
 
 A tela de login utiliza `<main>`, `<section>` e `<form>` para organizar semanticamente a estrutura.  
 Os campos usam `label` com `htmlFor`, melhorando acessibilidade.
+
+Para deixar com UX melhor, colocamos mensagens de erro quando o login possui campo em branco ou login incorreto, assim como mensagem de confirmação antes de direcionar para a página Home.
+
+O login é realizado por uma api, que busca se a conta existe e se a senha está correta. 
+
+---
+
+### Rota usada na Tela de Login
+```tsx
+import { NextResponse } from 'next/server'
+
+const accounts = [
+  { email: 'aluno@mackenzie.com', password: '0' },
+]
+
+export async function POST(request) {
+  const { email, password } = await request.json()
+
+  if (!email || !password) {
+    return NextResponse.json(
+      { error: 'Email e senha são obrigatórios' },
+      { status: 400 }
+    )
+  }
+
+  const user = accounts.find(
+    (account) => account.email === email && account.password === password
+  )
+
+  if (!user) {
+    return NextResponse.json(
+      { error: 'Credenciais inválidas' },
+      { status: 401 }
+    )
+  }
+
+  return NextResponse.json({ ok: true, email: user.email })
+}
+```
+
+Para o uso da api no login, usamos uma rota do tipo POST, que verifica se email e senha estão preenchidos (caso não estejam, devolve erro), buscando então na lista de contas, um usuário com aquele email e senha (caso o usuário não for encontrado ou a senha for incorreta, devolve erro).
 
 ---
 
@@ -218,7 +316,7 @@ export default function Home() {
             href={`/home/${disciplina.id}`}
             className={styles.card}
           >
-            <img src="/aula.jpg" alt="Imagem da disciplina" />
+            <img src={disciplina.banner} alt="Imagem da disciplina" />
 
             <div className={styles.cardContent}>
               <h2>{disciplina.nome}</h2>
@@ -234,16 +332,31 @@ export default function Home() {
 
 A Home exibe as disciplinas em cards, que ficam salvas em um arquivo separado.  
 O `map()` percorre a lista de disciplinas e cria um card para cada item.  
-O componente `Link` permite navegar para a página de detalhes da disciplina sem recarregar o site.
+O componente `Link` permite navegar para a página de detalhes da disciplina sem recarregar o site e mantendo uma rota dinâmica.
 
 ---
 
 ### Tela de Detalhes da Disciplina
 
 ```tsx
+import { notFound } from 'next/navigation'
 import styles from '../../styles/Disciplina.module.css'
+import { disciplinas } from '../../data/disciplinas'
 
-export default function Disciplina() {
+interface PageProps {
+  params: {
+    id: string
+  }
+}
+
+export default async function Disciplina({ params }: PageProps) {
+  const {id} = await params
+  const disciplina = disciplinas.find((item) => item.id === id)
+
+  if (!disciplina) {
+    notFound()
+  }
+
   return (
     <main className={styles.container}>
       <header className={styles.header}>
@@ -264,37 +377,68 @@ export default function Disciplina() {
       </section>
 
       <section className={styles.content}>
-        <h1>Disciplina 1</h1>
-        <p className={styles.professor}>Prof.(a) - Fulano</p>
+        <h1>{disciplina.nome}</h1>
+        <p className={styles.professor}>Prof.(a) - {disciplina.professor}</p>
 
         <hr />
 
         <section className={styles.cardsResumo}>
           <article className={styles.infoCard}>
             <div className={styles.circle}>↗</div>
+
             <div>
               <strong>MÉDIA ATUAL</strong>
-              <h2>7,5</h2>
+              <h2>{disciplina.media}</h2>
               <p>Mínimo para aprovação: 6,0</p>
             </div>
           </article>
 
           <article className={styles.infoCard}>
             <div className={styles.circle}>▣</div>
+
             <div>
               <strong>FALTAS</strong>
-              <h2>15%</h2>
+              <h2>{disciplina.faltas}</h2>
               <p>Presença mínima: 75%</p>
             </div>
           </article>
 
           <article className={styles.infoCard}>
             <div className={styles.circleGreen}>✓</div>
+
             <div>
               <strong>SITUAÇÃO</strong>
-              <h2 className={styles.aprovado}>Aprovado</h2>
+              <h2 className={disciplina.situacao === 'Aprovado' ? styles.aprovado : ''}>
+                {disciplina.situacao}
+              </h2>
             </div>
           </article>
+        </section>
+
+        <section className={styles.avaliacoes}>
+          <div className={styles.avaliacoesHeader}>
+            <h2>Avaliações</h2>
+          </div>
+
+          <div className={styles.tableHeader}>
+            <span>AVALIAÇÃO</span>
+            <span>DATA</span>
+            <span>PESO</span>
+            <span>NOTA</span>
+          </div>
+
+          {disciplina.avaliacoes.map((item, index) => (
+            <article className={styles.avaliacaoItem} key={index}>
+              <div>
+                <strong>{item[0]}</strong>
+                <p>{item[1]}</p>
+              </div>
+
+              <span>{item[2]}</span>
+              <span>{item[3]}</span>
+              <span className={styles.nota}>{item[4]}</span>
+            </article>
+          ))}
         </section>
       </section>
     </main>
@@ -303,8 +447,10 @@ export default function Disciplina() {
 ```
 
 A tela de disciplina apresenta informações detalhadas da matéria.  
-Os cards de resumo mostram média, faltas e situação do aluno.  
+Os cards de resumo mostram média, faltas, situação e avaliações do aluno.  
 Foram usados elementos semânticos como `<section>` e `<article>` para melhorar a organização do HTML.
+
+Para manter a forma dinâmica, utilizamos uma entrada com o parâmetro ``params``, que verifica se o ``id`` é válido, para depois buscar os dados da disciplina.
 
 ---
 
@@ -323,12 +469,7 @@ Foram usados elementos semânticos como `<section>` e `<article>` para melhorar 
     <span>NOTA</span>
   </div>
 
-  {[
-    ['Prova 1', 'Prova', '10/03/2024', '2,0', '8,0'],
-    ['Prova 2', 'Prova', '25/03/2024', '2,0', '7,5'],
-    ['Prova 3', 'Prova', '15/04/2024', '2,5', '6,5'],
-    ['Prova 4', 'Prova', '30/04/2024', '1,5', '8,0'],
-  ].map((item, index) => (
+  {disciplina.avaliacoes.map((item, index) => (
     <article className={styles.avaliacaoItem} key={index}>
       <div>
         <strong>{item[0]}</strong>
