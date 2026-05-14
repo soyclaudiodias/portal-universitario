@@ -53,7 +53,6 @@ export default function Disciplina() {
             <div>
               <strong>SITUAÇÃO</strong>
               <h2 className={styles.aprovado}>Aprovado</h2>
-              <p>Parabéns! 🎉</p>
             </div>
           </article>
         </section>
