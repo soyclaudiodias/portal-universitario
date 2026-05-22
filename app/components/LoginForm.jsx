@@ -33,7 +33,14 @@ export default function LoginForm() {
     }
 
     setSuccess(true)
-    setMessage(`Login bem-sucedido: ${data.email}`)
+
+    localStorage.setItem(
+      'usuarioLogado',
+      JSON.stringify(data.usuario)
+    )
+
+    setMessage(`Login bem-sucedido: ${data.usuario.nome}`)
+
     setEmail('')
     setPassword('')
 
