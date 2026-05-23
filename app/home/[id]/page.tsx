@@ -66,7 +66,7 @@ export default function Disciplina() {
 
       <section className={styles.banner}>
         <img
-          src="/aula.jpg"
+          src={disciplina.banner}
           alt="Imagem da disciplina"
         />
       </section>

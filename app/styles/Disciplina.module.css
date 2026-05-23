@@ -21,7 +21,7 @@
   border-radius: 50%;
   border: none;
   background: rgba(255, 255, 255, 0.08);
-  color: white;
+  color: rgba(80,80,80,0.87);
   cursor: pointer;
   font-size: 18px;
   transition: 0.2s;
