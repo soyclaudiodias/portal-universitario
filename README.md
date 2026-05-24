@@ -91,10 +91,10 @@ Futuramente, o sistema contará com integração de chat, possivelmente como:
 
 <img width="1919" height="866" alt="Captura de tela 2026-05-07 092346" src="https://github.com/user-attachments/assets/98135498-68d3-4206-b10d-762ae9701307" />
 <hr>
-<img width="1901" height="865" alt="Captura de tela 2026-05-07 092410" src="https://github.com/user-attachments/assets/593a9aff-8cb3-479a-b4a9-228655ed7892" />
+<img src="public/home.png" alt="Home" width="1919" height="866"/>
 <hr>
-<img width="1919" height="851" alt="Captura de tela 2026-05-07 092451" src="https://github.com/user-attachments/assets/97dbd73f-15db-4434-a3b3-25febec49904" />
-<img width="1919" height="868" alt="Captura de tela 2026-05-07 092504" src="https://github.com/user-attachments/assets/b7d0bc78-6b80-4e6c-94b9-28c7e9533af7" />
+<img width="1919" height="851" alt="Tela da materia 1" src="public/materia1.png" />
+<img width="1919" height="868" alt="Tela da materia 2" src="public/materia2.png" />
 
 
 ---
@@ -251,24 +251,50 @@ O login é realizado por uma api, que busca se a conta existe e se a senha está
 
 ### Rota usada na Tela de Login
 ```tsx
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 const accounts = [
-  { email: 'aluno@mackenzie.com', password: '0' },
+  {
+    id: 1,
+    nome: 'Cláudio Dias Alves',
+    email: 'claudio.alves@mackenzie.com.br',
+    password: '1234',
+    curso: 'Ciência da Computação',
+    campus: 'Higienópolis',
+    etapa: '1ª Etapa',
+    foto: '/user_claudio.jpeg',
+  },
+
+  {
+    id: 2,
+    nome: 'Guillermo Kuznietz',
+    email: 'guillermo.kuznietz@mackenzie.com.br',
+    password: '1234',
+    curso: 'Ciência da Computação',
+    campus: 'Higienópolis',
+    etapa: '2ª Etapa',
+    foto: '/user_guillermo.jpeg',
+  },
+
+  {
+    id: 3,
+    nome: 'Matheus Tobias Mustaro',
+    email: 'matheus.mustaro@mackenzie.com.br',
+    password: '1234',
+    curso: 'Ciência da Computação',
+    campus: 'Higienópolis',
+    etapa: '3ª Etapa',
+    foto: '/user_matheus.jpeg',
+  },
 ]
 
-export async function POST(request) {
+export async function POST(request: NextRequest) {
   const { email, password } = await request.json()
 
-  if (!email || !password) {
-    return NextResponse.json(
-      { error: 'Email e senha são obrigatórios' },
-      { status: 400 }
-    )
-  }
-
   const user = accounts.find(
-    (account) => account.email === email && account.password === password
+    (account) =>
+      account.email === email &&
+      account.password === password
   )
 
   if (!user) {
@@ -278,7 +304,19 @@ export async function POST(request) {
     )
   }
 
-  return NextResponse.json({ ok: true, email: user.email })
+  return NextResponse.json({
+    ok: true,
+
+    usuario: {
+      id: user.id,
+      nome: user.nome,
+      email: user.email,
+      curso: user.curso,
+      campus: user.campus,
+      etapa: user.etapa,
+      foto: user.foto,
+    },
+  })
 }
 ```
 
@@ -289,23 +327,79 @@ Para o uso da api no login, usamos uma rota do tipo POST, que verifica se email 
 ### Home com Cards de Disciplinas
 
 ```tsx
+'use client'
+
+import { useEffect, useState } from 'react'
 import styles from '../styles/Home.module.css'
 import Link from 'next/link'
-import { disciplinas } from '../data/disciplinas'
+import { useRouter } from 'next/navigation'
+
+interface Disciplina {
+  id: number
+  nome: string
+  professor: string
+  banner: string
+}
 
 export default function Home() {
+  const router = useRouter()
+
+  const [disciplinas, setDisciplinas] = useState<Disciplina[]>([])
+  const [usuario, setUsuario] = useState<any>(null)
+
+  useEffect(() => {
+    const usuarioSalvo = localStorage.getItem('usuarioLogado')
+
+    if (!usuarioSalvo) {
+      window.location.href = '/'
+      return
+    }
+
+    const usuarioParse = JSON.parse(usuarioSalvo)
+
+    setUsuario(usuarioParse)
+
+    async function buscarDisciplinas() {
+      const response = await fetch(
+        `/api/disciplinas?usuarioId=${usuarioParse.id}`
+      )
+
+      const data = await response.json()
+
+      setDisciplinas(data)
+    }
+
+    buscarDisciplinas()
+  }, [])
+
   return (
     <main className={styles.container}>
       <header className={styles.header}>
         <div className={styles.left}>
+          <button
+            className={styles.backButton}
+            onClick={() => router.back()}
+          >
+            ←
+          </button>
+
           <span>HIGIENÓPOLIS</span>
+
           <span className={styles.separator}>|</span>
-          <span>CURSO</span>
+
+          <span>{usuario?.curso || 'CURSO'}</span>
         </div>
 
         <div className={styles.right}>
-          <span className={styles.name}>NOME</span>
-          <img src="/user.png" alt="Usuário" className={styles.userIcon} />
+          <span className={styles.name}>
+            {usuario?.nome || 'NOME'}
+          </span>
+
+          <img
+            src={usuario?.foto || '/user.png'}
+            alt="Usuário"
+            className={styles.userIcon}
+          />
         </div>
       </header>
 
@@ -316,7 +410,10 @@ export default function Home() {
             href={`/home/${disciplina.id}`}
             className={styles.card}
           >
-            <img src={disciplina.banner} alt="Imagem da disciplina" />
+            <img
+              src={disciplina.banner}
+              alt="Imagem da disciplina"
+            />
 
             <div className={styles.cardContent}>
               <h2>{disciplina.nome}</h2>
@@ -339,19 +436,38 @@ O componente `Link` permite navegar para a página de detalhes da disciplina sem
 ### Tela de Detalhes da Disciplina
 
 ```tsx
-import { notFound } from 'next/navigation'
+'use client'
+
+import { useEffect, useState } from 'react'
+import {
+  notFound,
+  useParams,
+  useRouter,
+} from 'next/navigation'
+
 import styles from '../../styles/Disciplina.module.css'
 import { disciplinas } from '../../data/disciplinas'
 
-interface PageProps {
-  params: {
-    id: string
-  }
-}
+export default function Disciplina() {
+  const params = useParams()
+  const router = useRouter()
 
-export default async function Disciplina({ params }: PageProps) {
-  const {id} = await params
-  const disciplina = disciplinas.find((item) => item.id === id)
+  const id = params.id as string
+
+  const [usuario, setUsuario] = useState<any>(null)
+
+  const disciplina = disciplinas.find(
+    (item) => item.id === id
+  )
+
+  useEffect(() => {
+    const usuarioSalvo =
+      localStorage.getItem('usuarioLogado')
+
+    if (usuarioSalvo) {
+      setUsuario(JSON.parse(usuarioSalvo))
+    }
+  }, [])
 
   if (!disciplina) {
     notFound()
@@ -361,24 +477,44 @@ export default async function Disciplina({ params }: PageProps) {
     <main className={styles.container}>
       <header className={styles.header}>
         <div className={styles.left}>
+          <button
+            className={styles.backButton}
+            onClick={() => router.back()}
+          >
+            ←
+          </button>
+
           <span>HIGIENÓPOLIS</span>
+
           <span className={styles.separator}>|</span>
-          <span>CURSO</span>
+
+          <span>{usuario?.curso || 'CURSO'}</span>
         </div>
 
         <div className={styles.right}>
-          <span>NOME</span>
-          <img src="/user.png" alt="Usuário" className={styles.userIcon} />
+          <span>{usuario?.nome || 'NOME'}</span>
+
+          <img
+            src={usuario?.foto || '/user.png'}
+            alt="Usuário"
+            className={styles.userIcon}
+          />
         </div>
       </header>
 
       <section className={styles.banner}>
-        <img src="/aula.jpg" alt="Imagem da disciplina" />
+        <img
+          src={disciplina.banner}
+          alt="Imagem da disciplina"
+        />
       </section>
 
       <section className={styles.content}>
         <h1>{disciplina.nome}</h1>
-        <p className={styles.professor}>Prof.(a) - {disciplina.professor}</p>
+
+        <p className={styles.professor}>
+          Prof.(a) - {disciplina.professor}
+        </p>
 
         <hr />
 
@@ -388,7 +524,9 @@ export default async function Disciplina({ params }: PageProps) {
 
             <div>
               <strong>MÉDIA ATUAL</strong>
+
               <h2>{disciplina.media}</h2>
+
               <p>Mínimo para aprovação: 6,0</p>
             </div>
           </article>
@@ -398,17 +536,37 @@ export default async function Disciplina({ params }: PageProps) {
 
             <div>
               <strong>FALTAS</strong>
+
               <h2>{disciplina.faltas}</h2>
+
               <p>Presença mínima: 75%</p>
             </div>
           </article>
 
           <article className={styles.infoCard}>
-            <div className={styles.circleGreen}>✓</div>
+            <div
+              className={
+                disciplina.situacao === 'Aprovado'
+                  ? styles.circleGreen
+                  : styles.circleRed
+              }
+            >
+              {disciplina.situacao === 'Aprovado'
+                ? '✓'
+                : '✕'}
+            </div>
 
             <div>
               <strong>SITUAÇÃO</strong>
-              <h2 className={disciplina.situacao === 'Aprovado' ? styles.aprovado : ''}>
+
+              <h2
+                className={
+                  disciplina.situacao ===
+                    'Aprovado'
+                    ? styles.aprovado
+                    : styles.reprovado
+                }
+              >
                 {disciplina.situacao}
               </h2>
             </div>
@@ -427,18 +585,28 @@ export default async function Disciplina({ params }: PageProps) {
             <span>NOTA</span>
           </div>
 
-          {disciplina.avaliacoes.map((item, index) => (
-            <article className={styles.avaliacaoItem} key={index}>
-              <div>
-                <strong>{item[0]}</strong>
-                <p>{item[1]}</p>
-              </div>
+          {disciplina.avaliacoes.map(
+            (item, index) => (
+              <article
+                className={styles.avaliacaoItem}
+                key={index}
+              >
+                <div>
+                  <strong>{item[0]}</strong>
 
-              <span>{item[2]}</span>
-              <span>{item[3]}</span>
-              <span className={styles.nota}>{item[4]}</span>
-            </article>
-          ))}
+                  <p>{item[1]}</p>
+                </div>
+
+                <span>{item[2]}</span>
+
+                <span>{item[3]}</span>
+
+                <span className={styles.nota}>
+                  {item[4]}
+                </span>
+              </article>
+            )
+          )}
         </section>
       </section>
     </main>
@@ -451,6 +619,28 @@ Os cards de resumo mostram média, faltas, situação e avaliações do aluno.
 Foram usados elementos semânticos como `<section>` e `<article>` para melhorar a organização do HTML.
 
 Para manter a forma dinâmica, utilizamos uma entrada com o parâmetro ``params``, que verifica se o ``id`` é válido, para depois buscar os dados da disciplina.
+
+---
+### Rota usada na Tela de Disciplinas
+
+```tsx
+import { NextRequest, NextResponse } from 'next/server'
+import { disciplinas } from '@/app/data/disciplinas'
+
+export async function GET(request: NextRequest) {
+  const usuarioId = request.nextUrl.searchParams.get('usuarioId')
+
+  const disciplinasDoUsuario = disciplinas.filter(
+    (disciplina) =>
+      String(disciplina.usuarioId) === String(usuarioId)
+  )
+
+  return NextResponse.json(disciplinasDoUsuario)
+}
+```
+
+A rota busca os dados da disciplina através do ID vindo na URL, com ela, é usado um filtro que busca na lista de disciplinas, a correspondente daquele ID.
+
 
 ---
 
@@ -469,18 +659,28 @@ Para manter a forma dinâmica, utilizamos uma entrada com o parâmetro ``params`
     <span>NOTA</span>
   </div>
 
-  {disciplina.avaliacoes.map((item, index) => (
-    <article className={styles.avaliacaoItem} key={index}>
-      <div>
-        <strong>{item[0]}</strong>
-        <p>{item[1]}</p>
-      </div>
+  {disciplina.avaliacoes.map(
+    (item, index) => (
+      <article
+        className={styles.avaliacaoItem}
+        key={index}
+      >
+        <div>
+          <strong>{item[0]}</strong>
 
-      <span>{item[2]}</span>
-      <span>{item[3]}</span>
-      <span className={styles.nota}>{item[4]}</span>
-    </article>
-  ))}
+          <p>{item[1]}</p>
+        </div>
+
+        <span>{item[2]}</span>
+
+        <span>{item[3]}</span>
+
+        <span className={styles.nota}>
+          {item[4]}
+        </span>
+      </article>
+    )
+  )}
 </section>
 ```
 

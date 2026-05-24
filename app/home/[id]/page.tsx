@@ -124,7 +124,7 @@ export default function Disciplina() {
               <h2
                 className={
                   disciplina.situacao ===
-                  'Aprovado'
+                    'Aprovado'
                     ? styles.aprovado
                     : styles.reprovado
                 }
