@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import styles from '../styles/Home.module.css'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+
+import DisciplinaCard from '../components/DisciplinaCard'
 
 interface Disciplina {
   id: number
@@ -76,21 +77,10 @@ export default function Home() {
 
       <section className={styles.grid}>
         {disciplinas.map((disciplina) => (
-          <Link
+          <DisciplinaCard
             key={disciplina.id}
-            href={`/home/${disciplina.id}`}
-            className={styles.card}
-          >
-            <img
-              src={disciplina.banner}
-              alt="Imagem da disciplina"
-            />
-
-            <div className={styles.cardContent}>
-              <h2>{disciplina.nome}</h2>
-              <p>Prof.(a) - {disciplina.professor}</p>
-            </div>
-          </Link>
+            disciplina={disciplina}
+          />
         ))}
       </section>
     </main>

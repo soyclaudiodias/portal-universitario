@@ -10,6 +10,8 @@ import {
 import styles from '../../styles/Disciplina.module.css'
 import { disciplinas } from '../../data/disciplinas'
 
+import Avaliacoes from '../../components/Avaliacoes'
+
 export default function Disciplina() {
   const params = useParams()
   const router = useRouter()
@@ -38,30 +40,18 @@ export default function Disciplina() {
   return (
     <main className={styles.container}>
       <header className={styles.header}>
-        <div className={styles.left}>
-          <button
-            className={styles.backButton}
-            onClick={() => router.back()}
-          >
-            ←
-          </button>
+        <button
+          className={styles.backButton}
+          onClick={() => router.back()}
+        >
+          ←
+        </button>
 
-          <span>HIGIENÓPOLIS</span>
-
-          <span className={styles.separator}>|</span>
-
-          <span>{usuario?.curso || 'CURSO'}</span>
-        </div>
-
-        <div className={styles.right}>
-          <span>{usuario?.nome || 'NOME'}</span>
-
-          <img
-            src={usuario?.foto || '/user.png'}
-            alt="Usuário"
-            className={styles.userIcon}
-          />
-        </div>
+        <img
+          src={usuario?.foto || '/user.png'}
+          alt="Usuário"
+          className={styles.userIcon}
+        />
       </header>
 
       <section className={styles.banner}>
@@ -124,7 +114,7 @@ export default function Disciplina() {
               <h2
                 className={
                   disciplina.situacao ===
-                    'Aprovado'
+                  'Aprovado'
                     ? styles.aprovado
                     : styles.reprovado
                 }
@@ -135,41 +125,9 @@ export default function Disciplina() {
           </article>
         </section>
 
-        <section className={styles.avaliacoes}>
-          <div className={styles.avaliacoesHeader}>
-            <h2>Avaliações</h2>
-          </div>
-
-          <div className={styles.tableHeader}>
-            <span>AVALIAÇÃO</span>
-            <span>DATA</span>
-            <span>PESO</span>
-            <span>NOTA</span>
-          </div>
-
-          {disciplina.avaliacoes.map(
-            (item, index) => (
-              <article
-                className={styles.avaliacaoItem}
-                key={index}
-              >
-                <div>
-                  <strong>{item[0]}</strong>
-
-                  <p>{item[1]}</p>
-                </div>
-
-                <span>{item[2]}</span>
-
-                <span>{item[3]}</span>
-
-                <span className={styles.nota}>
-                  {item[4]}
-                </span>
-              </article>
-            )
-          )}
-        </section>
+        <Avaliacoes
+          avaliacoes={disciplina.avaliacoes}
+        />
       </section>
     </main>
   )
