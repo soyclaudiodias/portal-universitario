@@ -324,6 +324,20 @@ Para o uso da api no login, usamos uma rota do tipo POST, que verifica se email 
 
 ---
 
+## Componentes de Disciplina e Avaliações
+
+- `app/components/DisciplinaCard.tsx`
+  - Encapsula o layout de cada card de disciplina.
+  - Faz a navegação para `/home/[id]` usando `Link`.
+  - Mantém a página principal (`Home`) mais concisa.
+
+- `app/components/Avaliacoes.tsx`
+  - Renderiza a lista de avaliações na página de detalhes.
+  - Usa `styles.avaliacoes`, `styles.tableHeader` e `styles.avaliacaoItem` para separar visualmente cada linha.
+  - Facilita a manutenção do código, mantendo a lógica de exibição de avaliações isolada.
+
+---
+
 ### Home com Cards de Disciplinas
 
 ```tsx
@@ -331,8 +345,8 @@ Para o uso da api no login, usamos uma rota do tipo POST, que verifica se email 
 
 import { useEffect, useState } from 'react'
 import styles from '../styles/Home.module.css'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import DisciplinaCard from '../components/DisciplinaCard'
 
 interface Disciplina {
   id: number
@@ -343,7 +357,6 @@ interface Disciplina {
 
 export default function Home() {
   const router = useRouter()
-
   const [disciplinas, setDisciplinas] = useState<Disciplina[]>([])
   const [usuario, setUsuario] = useState<any>(null)
 
@@ -356,16 +369,13 @@ export default function Home() {
     }
 
     const usuarioParse = JSON.parse(usuarioSalvo)
-
     setUsuario(usuarioParse)
 
     async function buscarDisciplinas() {
       const response = await fetch(
         `/api/disciplinas?usuarioId=${usuarioParse.id}`
       )
-
       const data = await response.json()
-
       setDisciplinas(data)
     }
 
@@ -384,17 +394,12 @@ export default function Home() {
           </button>
 
           <span>HIGIENÓPOLIS</span>
-
           <span className={styles.separator}>|</span>
-
           <span>{usuario?.curso || 'CURSO'}</span>
         </div>
 
         <div className={styles.right}>
-          <span className={styles.name}>
-            {usuario?.nome || 'NOME'}
-          </span>
-
+          <span className={styles.name}>{usuario?.nome || 'NOME'}</span>
           <img
             src={usuario?.foto || '/user.png'}
             alt="Usuário"
@@ -405,21 +410,10 @@ export default function Home() {
 
       <section className={styles.grid}>
         {disciplinas.map((disciplina) => (
-          <Link
+          <DisciplinaCard
             key={disciplina.id}
-            href={`/home/${disciplina.id}`}
-            className={styles.card}
-          >
-            <img
-              src={disciplina.banner}
-              alt="Imagem da disciplina"
-            />
-
-            <div className={styles.cardContent}>
-              <h2>{disciplina.nome}</h2>
-              <p>Prof.(a) - {disciplina.professor}</p>
-            </div>
-          </Link>
+            disciplina={disciplina}
+          />
         ))}
       </section>
     </main>
@@ -427,13 +421,150 @@ export default function Home() {
 }
 ```
 
-A Home exibe as disciplinas em cards, que ficam salvas em um arquivo separado.  
-O `map()` percorre a lista de disciplinas e cria um card para cada item.  
-O componente `Link` permite navegar para a página de detalhes da disciplina sem recarregar o site e mantendo uma rota dinâmica.
+A Home carrega os dados do usuário do `localStorage` e busca as disciplinas pela API `/api/disciplinas` com `usuarioId`.  
+Cada disciplina é renderizada pelo componente `DisciplinaCard`, deixando a página mais organizada e reutilizável.
+
+O CSS em `Home.module.css` mantem a responsividade. O grid usa `repeat(auto-fit, minmax(350px, 1fr))` e, em telas pequenas, o conteúdo passa para uma coluna única, com o cabeçalho simplificado e as imagens dos cards ajustadas.
 
 ---
 
 ### Tela de Detalhes da Disciplina
+
+```tsx
+'use client'
+
+import { useEffect, useState } from 'react'
+import {
+  notFound,
+  useParams,
+  useRouter,
+} from 'next/navigation'
+
+import styles from '../../styles/Disciplina.module.css'
+import { disciplinas } from '../../data/disciplinas'
+import Avaliacoes from '../../components/Avaliacoes'
+
+export default function Disciplina() {
+  const params = useParams()
+  const router = useRouter()
+
+  const id = params.id as string
+  const [usuario, setUsuario] = useState<any>(null)
+
+  const disciplina = disciplinas.find(
+    (item) => item.id === id
+  )
+
+  useEffect(() => {
+    const usuarioSalvo =
+      localStorage.getItem('usuarioLogado')
+
+    if (usuarioSalvo) {
+      setUsuario(JSON.parse(usuarioSalvo))
+    }
+  }, [])
+
+  if (!disciplina) {
+    notFound()
+  }
+
+  return (
+    <main className={styles.container}>
+      <header className={styles.header}>
+        <button
+          className={styles.backButton}
+          onClick={() => router.back()}
+        >
+          ←
+        </button>
+
+        <img
+          src={usuario?.foto || '/user.png'}
+          alt="Usuário"
+          className={styles.userIcon}
+        />
+      </header>
+
+      <section className={styles.banner}>
+        <img
+          src={disciplina.banner}
+          alt="Imagem da disciplina"
+        />
+      </section>
+
+      <section className={styles.content}>
+        <h1>{disciplina.nome}</h1>
+        <p className={styles.professor}>
+          Prof.(a) - {disciplina.professor}
+        </p>
+
+        <hr />
+
+        <section className={styles.cardsResumo}>
+          <article className={styles.infoCard}>
+            <div className={styles.circle}>↗</div>
+            <div>
+              <strong>MÉDIA ATUAL</strong>
+              <h2>{disciplina.media}</h2>
+              <p>Mínimo para aprovação: 6,0</p>
+            </div>
+          </article>
+
+          <article className={styles.infoCard}>
+            <div className={styles.circle}>▣</div>
+            <div>
+              <strong>FALTAS</strong>
+              <h2>{disciplina.faltas}</h2>
+              <p>Presença mínima: 75%</p>
+            </div>
+          </article>
+
+          <article className={styles.infoCard}>
+            <div
+              className={
+                disciplina.situacao === 'Aprovado'
+                  ? styles.circleGreen
+                  : styles.circleRed
+              }
+            >
+              {disciplina.situacao === 'Aprovado'
+                ? '✓'
+                : '✕'}
+            </div>
+
+            <div>
+              <strong>SITUAÇÃO</strong>
+              <h2
+                className={
+                  disciplina.situacao ===
+                  'Aprovado'
+                    ? styles.aprovado
+                    : styles.reprovado
+                }
+              >
+                {disciplina.situacao}
+              </h2>
+            </div>
+          </article>
+        </section>
+
+        <Avaliacoes
+          avaliacoes={disciplina.avaliacoes}
+        />
+      </section>
+    </main>
+  )
+}
+```
+
+A tela de detalhes usa o componente `Avaliacoes` para exibir o histórico de avaliações em uma tabela responsiva.  
+O componente está separado em `app/components/Avaliacoes.tsx`, deixando a página de disciplina mais enxuta.
+
+As atualizações de estilo em `Disciplina.module.css` incluem:
+- colunas de resumo (`cardsResumo`) que viram uma única coluna em telas menores;
+- ocultação do cabeçalho da tabela (`.tableHeader`) em dispositivos mobile;
+- cards de avaliação (`.avaliacaoItem`) que se reorganizam em uma grade de uma coluna;
+- notas alinhadas com `justify-self: start` para facilitar a leitura.
 
 ```tsx
 'use client'
